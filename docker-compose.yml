@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ./api
+    container_name: nest-app
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    command: >
+      sh -c "
+        yarn migration:run &&
+        yarn seed:all &&
+        yarn start:prod
+      "
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend-app
+    ports:
+      - "5173:4173"
+    depends_on:
+      - api
+    command: ["vite", "preview", "--host"]
+    environment:
+      - NODE_ENV=production
+
+volumes:
+  pgdata:

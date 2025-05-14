@@ -23,41 +23,6 @@ type AnswerMap = {
   [questionId: number]: number; // question.id -> selected option.id
 };
 
-const translations: Record<string, Record<string, string>> = {
-  cym: {
-    name: "Name",
-    role: "Role",
-    country: "Country",
-    language: "Language",
-    createTopic: "Create Topic",
-    continue: "Continue",
-  },
-  arm: {
-    name: "Անուն",
-    role: "Դեր",
-    country: "Երկիր",
-    language: "Լեզու",
-    createTopic: "Ստեղծել հարցում",
-    continue: "Շարունակել",
-  },
-  rus: {
-    name: "Имя",
-    role: "Роль",
-    country: "Страна",
-    language: "Язык",
-    createTopic: "Создать запрос",
-    continue: "Продолжить",
-  },
-  ara: {
-    name: "الاسم",
-    role: "الدور",
-    country: "البلد",
-    language: "اللغة",
-    createTopic: "إنشاء استفسار",
-    continue: "استمرار",
-  },
-};
-
 export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();

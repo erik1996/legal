@@ -15,4 +15,7 @@ export class TopicQuery extends BaseEntityWithTimestamps {
 
   @Column('text', { nullable: true }) // optional before AI responds
   aiResponse: string;
+
+  @Column({ type: 'int', nullable: true })
+  score: number;
 }

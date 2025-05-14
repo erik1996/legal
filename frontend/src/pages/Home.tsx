@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 type Role = { id: number; name: string };
 type Country = { code: string; name: string };
@@ -23,8 +23,47 @@ type AnswerMap = {
   [questionId: number]: number; // question.id -> selected option.id
 };
 
+const translations: Record<string, Record<string, string>> = {
+  cym: {
+    name: "Name",
+    role: "Role",
+    country: "Country",
+    language: "Language",
+    createTopic: "Create Topic",
+    continue: "Continue",
+  },
+  arm: {
+    name: "Անուն",
+    role: "Դեր",
+    country: "Երկիր",
+    language: "Լեզու",
+    createTopic: "Ստեղծել հարցում",
+    continue: "Շարունակել",
+  },
+  rus: {
+    name: "Имя",
+    role: "Роль",
+    country: "Страна",
+    language: "Язык",
+    createTopic: "Создать запрос",
+    continue: "Продолжить",
+  },
+  ara: {
+    name: "الاسم",
+    role: "الدور",
+    country: "البلد",
+    language: "اللغة",
+    createTopic: "إنشاء استفسار",
+    continue: "استمرار",
+  },
+};
+
 export default function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const defaultLang = searchParams.get("lang") || "cym";
+  const [lang, setLang] = useState(defaultLang);
   const [roles, setRoles] = useState<Role[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -37,10 +76,16 @@ export default function Home() {
 
   useEffect(() => {
     const load = async () => {
+      setName("");
+      setRoles([]);
+      setSelectedRole("");
+      setSelectedCountry("");
+      setAnswers({});
+
       const [rolesRes, countriesRes, questionsRes] = await Promise.all([
-        axios.get(`${API_HOST}/role`),
-        axios.get(`${API_HOST}/countries?lang=cym`),
-        axios.get(`${API_HOST}/questions`),
+        axios.get(`${API_HOST}/role?lang=${lang}`),
+        axios.get(`${API_HOST}/countries?lang=${lang}`),
+        axios.get(`${API_HOST}/questions?lang=${lang}`),
       ]);
       setRoles(rolesRes.data);
       setCountries(countriesRes.data);
@@ -48,7 +93,7 @@ export default function Home() {
     };
 
     load();
-  }, [API_HOST]);
+  }, [API_HOST, lang]);
 
   const handleSelectAnswer = (questionId: number, optionId: number) => {
     setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
@@ -73,7 +118,7 @@ export default function Home() {
       .post(`${API_HOST}/topic`, payload)
       .then((res) => {
         const topicId = res.data.id; // adjust if your API returns it under a different key
-        navigate(`/message/${topicId}`);
+        navigate(`/message/${topicId}?lang=${lang}`);
       })
       .catch((err) => {
         console.error(err);
@@ -86,20 +131,73 @@ export default function Home() {
     !selectedRole ||
     !selectedCountry ||
     Object.keys(answers).length !== questions.length;
-
+  const translations: Record<string, Record<string, string>> = {
+    cym: {
+      name: "Name",
+      role: "Role",
+      country: "Country",
+      language: "Language",
+      createTopic: "Create Topic",
+      continue: "Continue",
+    },
+    arm: {
+      name: "Անուն",
+      role: "Դեր",
+      country: "Երկիր",
+      language: "Լեզու",
+      createTopic: "Ստեղծել հարցում",
+      continue: "Շարունակել",
+    },
+    rus: {
+      name: "Имя",
+      role: "Роль",
+      country: "Страна",
+      language: "Язык",
+      createTopic: "Создать запрос",
+      continue: "Продолжить",
+    },
+    ara: {
+      name: "الاسم",
+      role: "الدور",
+      country: "البلد",
+      language: "اللغة",
+      createTopic: "إنشاء استفسار",
+      continue: "استمرار",
+    },
+  };
+  const t = translations[lang] || translations.cym;
   return (
     <Box mx="auto" display="flex" flexDirection="column" gap={3}>
-      <Typography variant="h5">Create Topic</Typography>
+      <TextField
+        label={t.language}
+        select
+        fullWidth
+        value={lang}
+        onChange={(e) => {
+          const newLang = e.target.value;
+          setLang(newLang);
+          const params = new URLSearchParams(location.search);
+          params.set("lang", newLang);
+          navigate(`${location.pathname}?${params.toString()}`);
+        }}
+      >
+        <MenuItem value="cym">English</MenuItem>
+        <MenuItem value="arm">Հայերեն</MenuItem>
+        <MenuItem value="rus">Русский</MenuItem>
+        <MenuItem value="ara">العربية</MenuItem>
+      </TextField>
+
+      <Typography variant="h5">{t.createTopic}</Typography>
 
       <TextField
-        label="Name"
+        label={t.name}
         fullWidth
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
 
       <TextField
-        label="Role"
+        label={t.role}
         select
         fullWidth
         value={selectedRole}
@@ -113,7 +211,7 @@ export default function Home() {
       </TextField>
 
       <TextField
-        label="Country"
+        label={t.country}
         select
         fullWidth
         value={selectedCountry}

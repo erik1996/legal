@@ -7,6 +7,15 @@ export class QuestionOption extends BaseEntityWithTimestamps {
   @Column('text')
   option: string;
 
+  @Column({ nullable: true })
+  option_arm?: string;
+
+  @Column({ nullable: true })
+  option_rus?: string;
+
+  @Column({ nullable: true })
+  option_ara?: string;
+
   @Column()
   questionId: number;
 

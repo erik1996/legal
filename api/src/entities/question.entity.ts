@@ -8,6 +8,15 @@ export class Question extends BaseEntityWithTimestamps {
   @Column('text')
   question: string;
 
+  @Column('text', { nullable: true })
+  question_arm: string;
+
+  @Column({ nullable: true })
+  question_rus: string;
+
+  @Column({ nullable: true })
+  question_ara: string;
+
   @Column()
   priority: number;
 

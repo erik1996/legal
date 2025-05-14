@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { firstValueFrom } from 'rxjs';
 import { Repository } from 'typeorm';
 import { CreateTopicDto } from './dto/create-topic.dto';
+import { QuestionOption } from './entities/question-option.entity';
 import { Question } from './entities/question.entity';
 import { Role } from './entities/role.entity';
 import { Topic } from './entities/topic.entity';
@@ -28,10 +29,26 @@ export class AppService {
     this.apiUrl = this.configService.get<string>('COUNTRY_API') || '';
   }
 
-  async getAllRoles() {
-    return this.roleRepo.find({
-      select: ['id', 'name'],
-    });
+  async getAllRoles(lang: string) {
+    const roles = await this.roleRepo.find();
+
+    return roles.map((role) => ({
+      id: role.id,
+      name: this.getTranslatedRoleName(role as unknown as Role, lang),
+    }));
+  }
+
+  private getTranslatedRoleName(role: Role, lang: string): string {
+    switch (lang) {
+      case 'arm':
+        return role.name_arm?.trim() || role.name;
+      case 'rus':
+        return role.name_rus?.trim() || role.name;
+      case 'ara':
+        return role.name_ara?.trim() || role.name;
+      default:
+        return role.name;
+    }
   }
 
   async getCountriesByLangClaudeStyle(
@@ -40,6 +57,10 @@ export class AppService {
     const headers = {
       'Content-Type': 'application/json',
     };
+
+    if (lang === 'arm') {
+      lang = 'cym';
+    }
 
     try {
       const response = await firstValueFrom(
@@ -77,11 +98,47 @@ export class AppService {
     }
   }
 
-  getAllQuestionsWithOptions() {
-    return this.questionRepo.find({
+  async getAllQuestionsWithOptions(lang: string) {
+    const questions = await this.questionRepo.find({
       order: { priority: 'ASC' },
       relations: ['options'],
     });
+
+    return questions.map((question) => ({
+      id: question.id,
+      question: this.getTranslatedQuestion(question, lang),
+      priority: question.priority,
+      options: question.options.map((opt) => ({
+        id: opt.id,
+        option: this.getTranslatedOption(opt, lang),
+      })),
+    }));
+  }
+
+  private getTranslatedQuestion(question: Question, lang: string): string {
+    switch (lang) {
+      case 'arm':
+        return question.question_arm?.trim() || question.question;
+      case 'rus':
+        return question.question_rus?.trim() || question.question;
+      case 'ara':
+        return question.question_ara?.trim() || question.question;
+      default:
+        return question.question;
+    }
+  }
+
+  private getTranslatedOption(option: QuestionOption, lang: string): string {
+    switch (lang) {
+      case 'arm':
+        return option.option_arm?.trim() || option.option;
+      case 'rus':
+        return option.option_rus?.trim() || option.option;
+      case 'ara':
+        return option.option_ara?.trim() || option.option;
+      default:
+        return option.option;
+    }
   }
 
   async createTopic(data: CreateTopicDto): Promise<Topic> {

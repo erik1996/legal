@@ -8,7 +8,7 @@ import {
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 type Message = {
   sender: "user" | "ai";
@@ -16,6 +16,9 @@ type Message = {
 };
 
 export default function Messenger() {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const lang = searchParams.get("lang") || "cym";
   const { topicId } = useParams();
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
@@ -34,7 +37,7 @@ export default function Messenger() {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API_HOST}/claude/ask`, {
+      const res = await axios.post(`${API_HOST}/claude/ask?lang=${lang}`, {
         topicId,
         question: message,
       });

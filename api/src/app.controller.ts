@@ -7,8 +7,8 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get('/role')
-  getRoles() {
-    return this.appService.getAllRoles();
+  getRoles(@Query('lang') lang: string) {
+    return this.appService.getAllRoles(lang);
   }
 
   @Get('/countries')
@@ -17,8 +17,8 @@ export class AppController {
   }
 
   @Get('/questions')
-  getQuestions() {
-    return this.appService.getAllQuestionsWithOptions();
+  getQuestions(@Query('lang') lang: string) {
+    return this.appService.getAllQuestionsWithOptions(lang);
   }
 
   @Post('/topic')

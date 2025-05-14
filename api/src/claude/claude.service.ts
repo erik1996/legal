@@ -39,7 +39,10 @@ export class ClaudeService {
     this.fallbackSystemMessage = 'You are a helpful legal assistant.';
   }
 
-  async getAnswerFromClaude(input: LegalQueryInput): Promise<string> {
+  async getAnswerFromClaude(
+    input: LegalQueryInput,
+    lang: string,
+  ): Promise<string> {
     const topic = await this.topicRepo.findOne({
       where: { id: input.topicId },
     });
@@ -73,6 +76,12 @@ export class ClaudeService {
 
       answerMap.unshift({ question: 'Country', answer: topic.country });
       userPrompt = this.buildLegalPrompt(input, answerMap);
+    }
+
+    if (lang !== 'cym') {
+      userPrompt += `\n\nPlease answer this question in ${this.mapLangToLabel(
+        lang,
+      )} (${lang}).`;
     }
 
     const topicQuery = await this.topicQueryRepo.save({
@@ -172,5 +181,18 @@ The question is:
 
       return messages;
     });
+  }
+
+  private mapLangToLabel(lang: string): string {
+    switch (lang) {
+      case 'arm':
+        return 'Armenian';
+      case 'rus':
+        return 'Russian';
+      case 'ara':
+        return 'Arabic';
+      default:
+        return 'English';
+    }
   }
 }

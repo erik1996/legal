@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Query } from '@nestjs/common';
 import { ClaudeService } from './claude.service';
 import { LegalQueryInput } from './dto/legal-query';
 
@@ -8,8 +7,8 @@ export class ClaudeController {
   constructor(private readonly claudeService: ClaudeService) {}
 
   @Post('ask')
-  async askBasic(@Body() input: LegalQueryInput) {
-    const result = await this.claudeService.getAnswerFromClaude(input);
+  async askBasic(@Body() input: LegalQueryInput, @Query('lang') lang: string) {
+    const result = await this.claudeService.getAnswerFromClaude(input, lang);
     return { response: result };
   }
 }

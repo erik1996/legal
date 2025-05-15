@@ -109,7 +109,7 @@ export class ClaudeService {
 
     const body = {
       model: 'claude-3-7-sonnet-20250219',
-      max_tokens: 1000,
+      max_tokens: 10000,
       temperature: 0,
       system: role?.systemMessage || this.fallbackSystemMessage,
       messages,
